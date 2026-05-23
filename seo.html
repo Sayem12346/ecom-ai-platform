@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopAI — SEO Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0A0A0A; color: #E8E8E8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    nav { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E1E1E; }
+    .logo { font-size: 20px; font-weight: 800; color: #00FF94; }
+    .back { font-size: 13px; color: #555; text-decoration: none; }
+    .container { padding: 24px; max-width: 500px; margin: 0 auto; }
+    h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .sub { font-size: 13px; color: #555; margin-bottom: 24px; }
+    label { font-size: 13px; color: #888; margin-bottom: 6px; display: block; }
+    input, textarea { background: #111; border: 1px solid #2A2A2A; border-radius: 10px; padding: 14px 16px; color: #E8E8E8; font-size: 15px; outline: none; width: 100%; margin-bottom: 16px; }
+    input:focus, textarea:focus { border-color: #00FF9460; }
+    input::placeholder, textarea::placeholder { color: #444; }
+    textarea { min-height: 80px; resize: vertical; }
+    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 16px; }
+    button:disabled { background: #1A1A1A; color: #444; cursor: not-allowed; }
+    .result-box { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 20px; display: none; }
+    .result-title { font-size: 13px; color: #00FF94; font-weight: 700; margin-bottom: 8px; }
+    .result-text { font-size: 14px; color: #CCC; line-height: 1.6; margin-bottom: 16px; background: #0A0A0A; border-radius: 8px; padding: 12px; }
+    .copy-btn { background: transparent; border: 1px solid #2A2A2A; color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; margin-bottom: 0; }
+    .copy-btn:hover { border-color: #00FF9460; color: #00FF94; }
+    .loading-text { text-align: center; color: #555; font-size: 14px; padding: 16px; display: none; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">ShopAI</div>
+    <a href="index.html" class="back">← Home</a>
+  </nav>
+
+  <div class="container">
+    <h2>🤖 AI SEO Generator</h2>
+    <p class="sub">Product info দাও — AI বাকি কাজ করবে</p>
+
+    <label>Product নাম *</label>
+    <input type="text" id="productName" placeholder="যেমন: Samsung Galaxy A55">
+
+    <label>Category</label>
+    <input type="text" id="category" placeholder="যেমন: Smartphone, Fashion, Electronics">
+
+    <label>দাম (টাকা)</label>
+    <input type="number" id="price" placeholder="যেমন: 35000">
+
+    <label>বিশেষ কিছু (optional)</label>
+    <textarea id="features" placeholder="যেমন: 6.6 inch display, 50MP camera, 5000mAh battery"></textarea>
+
+    <button onclick="generateSEO()" id="genBtn">✨ AI দিয়ে SEO বানাও</button>
+    <div class="loading-text" id="loadingText">⏳ AI কাজ করছে, একটু অপেক্ষা করো...</div>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-title">📌 SEO Title (বাংলা)</div>
+      <div class="result-text" id="titleBn"></div>
+
+      <div class="result-title">📌 SEO Title (English)</div>
+      <div class="result-text" id="titleEn"></div>
+
+      <div class="result-title">📝 Description (বাংলা)</div>
+      <div class="result-text" id="descBn"></div>
+
+      <div class="result-title">📝 Description (English)</div>
+      <div class="result-text" id="descEn"></div>
+
+      <button class="copy-btn" onclick="copyAll()">📋 সব Copy করো</button>
+    </div>
+  </div>
+
+  <script>
+    const CLAUDE_KEY = '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';
+
+    async function generateSEO() {
+      const name = document.getElementById('productName').value.trim();
+      const category = document.getElementById('category').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const features = document.getElementById('features').value.trim();
+
+      if (!name) { alert('Product নাম দাও'); return; }
+
+      const btn = document.getElementById('genBtn');
+      btn.disabled = true;
+      document.getElementById('loadingText').style.display = 'block';
+      document.getElementById('resultBox').style.display = 'none';
+
+      const prompt = `তুমি একজন ecommerce SEO expert। নিচের product এর জন্য SEO content বানাও।
+
+Product: ${name}
+Category: ${category || 'General'}
+Price: ${price ? price + ' টাকা' : 'উল্লেখ নেই'}
+Features: ${features || 'উল্লেখ নেই'}
+
+এই format এ দাও (exactly এই labels দিয়ে):
+TITLE_BN: [বাংলায় SEO title, ৬০ character এর মধ্যে]
+TITLE_EN: [English এ SEO title, ৬০ character এর মধ্যে]
+DESC_BN: [বাংলায় product description, ১৫০-২০০ word, customer কে buy করতে উৎসাহিত করবে]
+DESC_EN: [English এ product description, ১৫০-২০০ word, customer কে buy করতে উৎসাহিত করবে]`;
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': CLAUDE_KEY,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        const data = await res.json();
+        const text = data.content[0].text;
+
+        document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
+        document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
+        document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
+        document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
+        document.getElementById('resultBox').style.display = 'block';
+
+      } catch {
+        alert('❌ কিছু একটা হয়নি। Key ঠিক আছে কিনা দেখো।');
+      }
+
+      btn.disabled = false;
+      document.getElementById('loadingText').style.display = 'none';
+    }
+
+    function extract(text, label) {
+      const regex = new RegExp(label + ':([\\s\\S]*?)(?=TITLE_|DESC_|$)');
+      const match = text.match(regex);
+      return match ? match[1].trim() : '';
+    }
+
+    function copyAll() {
+      const all = `SEO Title (বাংলা): ${document.getElementById('titleBn').textContent}
+
+SEO Title (English): ${document.getElementById('titleEn').textContent}
+
+Description (বাংলা): ${document.getElementById('descBn').textContent}
+
+Description (English): ${document.getElementById('descEn').textContent}`;
+      navigator.clipboard.writeText(all);
+      alert('✅ Copied!');
+    }
+  </script>
+
+</body>
+</html>
