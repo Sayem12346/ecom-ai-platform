@@ -18,13 +18,14 @@
     input:focus, textarea:focus { border-color: #00FF9460; }
     input::placeholder, textarea::placeholder { color: #444; }
     textarea { min-height: 80px; resize: vertical; }
-    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 16px; }
+    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 12px; }
     button:disabled { background: #1A1A1A; color: #444; cursor: not-allowed; }
     .result-box { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 20px; display: none; }
     .result-title { font-size: 13px; color: #00FF94; font-weight: 700; margin-bottom: 8px; }
     .result-text { font-size: 14px; color: #CCC; line-height: 1.6; margin-bottom: 16px; background: #0A0A0A; border-radius: 8px; padding: 12px; }
     .copy-btn { background: transparent; border: 1px solid #2A2A2A; color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; margin-bottom: 0; }
     .loading-text { text-align: center; color: #555; font-size: 14px; padding: 16px; display: none; }
+    .debug-box { background: #111; border: 1px solid #FF6B3540; border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 12px; color: #FF6B35; display: none; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -42,7 +43,7 @@
     <input type="text" id="productName" placeholder="যেমন: Samsung Galaxy A55">
 
     <label>Category</label>
-    <input type="text" id="category" placeholder="যেমন: Smartphone, Fashion, Electronics">
+    <input type="text" id="category" placeholder="যেমন: Smartphone, Fashion">
 
     <label>দাম (টাকা)</label>
     <input type="number" id="price" placeholder="যেমন: 35000">
@@ -51,7 +52,10 @@
     <textarea id="features" placeholder="যেমন: 6.6 inch display, 50MP camera"></textarea>
 
     <button onclick="generateSEO()" id="genBtn">✨ AI দিয়ে SEO বানাও</button>
+    <button onclick="testAPI()" style="background:#1A1A1A; color:#888; font-size:13px; padding:10px;">🔧 API Test করো</button>
+
     <div class="loading-text" id="loadingText">⏳ AI কাজ করছে...</div>
+    <div class="debug-box" id="debugBox"></div>
 
     <div class="result-box" id="resultBox">
       <div class="result-title">📌 SEO Title (বাংলা)</div>
@@ -69,6 +73,23 @@
   <script>
     const API_KEY = 'AIzaSyCJeU4RXgEzrDiuTKq90sk5fPghBSR9ZDc';
 
+    async function testAPI() {
+      const debugBox = document.getElementById('debugBox');
+      debugBox.style.display = 'block';
+      debugBox.textContent = 'Testing...';
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Say hello in Bengali' }] }] })
+        });
+        const data = await res.json();
+        debugBox.textContent = JSON.stringify(data, null, 2);
+      } catch(e) {
+        debugBox.textContent = 'Error: ' + e.message;
+      }
+    }
+
     async function generateSEO() {
       const name = document.getElementById('productName').value.trim();
       const category = document.getElementById('category').value.trim();
@@ -81,6 +102,7 @@
       btn.disabled = true;
       document.getElementById('loadingText').style.display = 'block';
       document.getElementById('resultBox').style.display = 'none';
+      document.getElementById('debugBox').style.display = 'none';
 
       const prompt = `তুমি একজন ecommerce SEO expert। নিচের product এর জন্য SEO content বানাও।
 
@@ -99,22 +121,24 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-
         const data = await res.json();
-        const text = data.candidates[0].content.parts[0].text;
 
-        document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
-        document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
-        document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
-        document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
-        document.getElementById('resultBox').style.display = 'block';
-
-      } catch {
-        alert('❌ কিছু একটা হয়নি। Key ঠিক আছে কিনা দেখো।');
+        if (data.candidates && data.candidates[0]) {
+          const text = data.candidates[0].content.parts[0].text;
+          document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
+          document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
+          document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
+          document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
+          document.getElementById('resultBox').style.display = 'block';
+        } else {
+          const debugBox = document.getElementById('debugBox');
+          debugBox.style.display = 'block';
+          debugBox.textContent = JSON.stringify(data, null, 2);
+        }
+      } catch(e) {
+        alert('❌ Error: ' + e.message);
       }
 
       btn.disabled = false;
@@ -122,7 +146,7 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
     }
 
     function extract(text, label) {
-      const regex = new RegExp(label + ':([\\s\\S]*?)(?=TITLE_|DESC_|$)');
+      const regex = new RegExp(label + ':([\\s\\S]*?)(?=TITLE_BN:|TITLE_EN:|DESC_BN:|DESC_EN:|$)');
       const match = text.match(regex);
       return match ? match[1].trim() : '';
     }
@@ -135,4 +159,4 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
   </script>
 
 </body>
-</htm
+</html>
