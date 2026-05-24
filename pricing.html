@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopAI — Pricing Calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0A0A0A; color: #E8E8E8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    nav { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E1E1E; }
+    .logo { font-size: 20px; font-weight: 800; color: #00FF94; }
+    .back { font-size: 13px; color: #555; text-decoration: none; }
+    .container { padding: 24px; max-width: 500px; margin: 0 auto; }
+    h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .sub { font-size: 13px; color: #555; margin-bottom: 24px; }
+    label { font-size: 13px; color: #888; margin-bottom: 6px; display: block; }
+    input { background: #111; border: 1px solid #2A2A2A; border-radius: 10px; padding: 14px 16px; color: #E8E8E8; font-size: 15px; outline: none; width: 100%; margin-bottom: 16px; }
+    input:focus { border-color: #00FF9460; }
+    input::placeholder { color: #444; }
+    .slider-wrap { margin-bottom: 20px; }
+    .slider-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .slider-label { font-size: 13px; color: #888; }
+    .slider-value { font-size: 15px; font-weight: 800; color: #00FF94; }
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #1E1E1E; outline: none; margin-bottom: 0; padding: 0; border: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #00FF94; cursor: pointer; }
+    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 16px; margin-top: 8px; }
+    .result-box { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 20px; display: none; margin-bottom: 16px; }
+    .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #161616; }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { font-size: 13px; color: #666; }
+    .result-value { font-size: 16px; font-weight: 800; color: #E8E8E8; }
+    .result-value.green { color: #00FF94; }
+    .result-value.big { font-size: 24px; color: #00FF94; }
+    .post-box { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 20px; display: none; }
+    .post-title { font-size: 13px; color: #00FF94; font-weight: 700; margin-bottom: 12px; }
+    .post-text { font-size: 14px; color: #CCC; line-height: 1.7; background: #0A0A0A; border-radius: 8px; padding: 14px; margin-bottom: 12px; white-space: pre-wrap; }
+    .copy-btn { background: transparent; border: 1px solid #2A2A2A; color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">ShopAI</div>
+    <a href="index.html" class="back">← Home</a>
+  </nav>
+
+  <div class="container">
+    <h2>💰 Pricing Calculator</h2>
+    <p class="sub">Cost দাও — AI sell price আর Facebook post বানাবে</p>
+
+    <label>Product নাম *</label>
+    <input type="text" id="productName" placeholder="যেমন: Samsung Galaxy A55">
+
+    <label>Cost Price (টাকা) *</label>
+    <input type="number" id="costPrice" placeholder="যেমন: 25000">
+
+    <label>Shipping Cost (টাকা)</label>
+    <input type="number" id="shippingCost" placeholder="যেমন: 120">
+
+    <div class="slider-wrap">
+      <div class="slider-top">
+        <span class="slider-label">Profit Margin</span>
+        <span class="slider-value" id="marginDisplay">20%</span>
+      </div>
+      <input type="range" id="marginSlider" min="5" max="100" value="20" oninput="updateMargin()">
+    </div>
+
+    <button onclick="calculate()">🧮 Calculate করো</button>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-row">
+        <span class="result-label">Cost Price</span>
+        <span class="result-value" id="resCost"></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Shipping</span>
+        <span class="result-value" id="resShipping"></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Profit (<span id="resMarginPct"></span>%)</span>
+        <span class="result-value green" id="resProfit"></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Sell Price</span>
+        <span class="result-value big" id="resSell"></span>
+      </div>
+    </div>
+
+    <div class="post-box" id="postBox">
+      <div class="post-title">📱 Facebook Post Ready</div>
+      <div class="post-text" id="postText"></div>
+      <button class="copy-btn" onclick="copyPost()">📋 Copy করো</button>
+    </div>
+  </div>
+
+  <script>
+    function updateMargin() {
+      document.getElementById('marginDisplay').textContent = document.getElementById('marginSlider').value + '%';
+    }
+
+    async function calculate() {
+      const name = document.getElementById('productName').value.trim();
+      const cost = parseFloat(document.getElementById('costPrice').value);
+      const shipping = parseFloat(document.getElementById('shippingCost').value) || 0;
+      const margin = parseFloat(document.getElementById('marginSlider').value);
+
+      if (!name || !cost) { alert('Product নাম ও Cost Price দাও'); return; }
+
+      const total = cost + shipping;
+      const profit = Math.round(total * margin / 100);
+      const sellPrice = total + profit;
+
+      document.getElementById('resCost').textContent = '৳' + cost.toLocaleString();
+      document.getElementById('resShipping').textContent = '৳' + shipping.toLocaleString();
+      document.getElementById('resMarginPct').textContent = margin;
+      document.getElementById('resProfit').textContent = '+৳' + profit.toLocaleString();
+      document.getElementById('resSell').textContent = '৳' + sellPrice.toLocaleString();
+      document.getElementById('resultBox').style.display = 'block';
+
+      // AI Facebook post generate
+      const prompt = `একটি আকর্ষণীয় বাংলা Facebook post লেখো এই product এর জন্য:
+Product: ${name}
+মূল্য: ৳${sellPrice.toLocaleString()} টাকা
+এতে emoji ব্যবহার করো, দাম highlight করো, এবং শেষে "অর্ডার করতে inbox করুন 📩" লেখো। ৫-৭ লাইনের মধ্যে রাখো।`;
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        if (data.choices && data.choices[0]) {
+          document.getElementById('postText').textContent = data.choices[0].message.content;
+          document.getElementById('postBox').style.display = 'block';
+        }
+      } catch(e) {
+        console.log('Post generation failed:', e);
+      }
+    }
+
+    function copyPost() {
+      navigator.clipboard.writeText(document.getElementById('postText').textContent);
+      alert('✅ Copied!');
+    }
+  </script>
+
+</body>
+</html>
