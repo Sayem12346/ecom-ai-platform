@@ -25,7 +25,6 @@
     .result-text { font-size: 14px; color: #CCC; line-height: 1.6; margin-bottom: 16px; background: #0A0A0A; border-radius: 8px; padding: 12px; }
     .copy-btn { background: transparent; border: 1px solid #2A2A2A; color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; margin-bottom: 0; }
     .loading-text { text-align: center; color: #555; font-size: 14px; padding: 16px; display: none; }
-    .debug-box { background: #111; border: 1px solid #FF6B3540; border-radius: 10px; padding: 14px; margin-top: 16px; font-size: 11px; color: #FF6B35; display: none; word-break: break-all; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -53,7 +52,6 @@
 
     <button onclick="generateSEO()" id="genBtn">✨ AI দিয়ে SEO বানাও</button>
     <div class="loading-text" id="loadingText">⏳ AI কাজ করছে...</div>
-    <div class="debug-box" id="debugBox"></div>
 
     <div class="result-box" id="resultBox">
       <div class="result-title">📌 SEO Title (বাংলা)</div>
@@ -81,7 +79,6 @@
       btn.disabled = true;
       document.getElementById('loadingText').style.display = 'block';
       document.getElementById('resultBox').style.display = 'none';
-      document.getElementById('debugBox').style.display = 'none';
 
       const prompt = `তুমি একজন ecommerce SEO expert। নিচের product এর জন্য SEO content বানাও।
 
@@ -105,19 +102,19 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
 
         const data = await res.json();
 
-        // Debug — response দেখাবে
-        const debugBox = document.getElementById('debugBox');
-        debugBox.style.display = 'block';
-        debugBox.textContent = JSON.stringify(data, null, 2);
-
-    if (data.choices && data.choices[0]) {
-  const text = data.choices[0].message.content;
+        if (data.choices && data.choices[0]) {
+          const text = data.choices[0].message.content;
           document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
           document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
           document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
           document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
           document.getElementById('resultBox').style.display = 'block';
-    }
+        } else {
+          alert('❌ AI response আসেনি। আবার চেষ্টা করো।');
+        }
+      } catch(e) {
+        alert('❌ Error: ' + e.message);
+      }
 
       btn.disabled = false;
       document.getElementById('loadingText').style.display = 'none';
