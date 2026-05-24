@@ -117,11 +117,7 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
           document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
           document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
           document.getElementById('resultBox').style.display = 'block';
-        }
-
-      } catch(e) {
-        const debugBox = document.getElementById('debugBox');
-            }
+    }
 
       btn.disabled = false;
       document.getElementById('loadingText').style.display = 'none';
