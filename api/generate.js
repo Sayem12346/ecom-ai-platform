@@ -4,20 +4,19 @@ export default async function handler(req, res) {
   }
 
   const { prompt } = req.body;
-  const key = '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';
+  const key = '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';
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
+        model: 'llama3-8b-8192',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1000
       })
     });
 
