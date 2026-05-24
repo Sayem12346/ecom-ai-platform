@@ -24,7 +24,6 @@
     .result-title { font-size: 13px; color: #00FF94; font-weight: 700; margin-bottom: 8px; }
     .result-text { font-size: 14px; color: #CCC; line-height: 1.6; margin-bottom: 16px; background: #0A0A0A; border-radius: 8px; padding: 12px; }
     .copy-btn { background: transparent; border: 1px solid #2A2A2A; color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; width: auto; margin-bottom: 0; }
-    .copy-btn:hover { border-color: #00FF9460; color: #00FF94; }
     .loading-text { text-align: center; color: #555; font-size: 14px; padding: 16px; display: none; }
   </style>
 </head>
@@ -43,37 +42,31 @@
     <input type="text" id="productName" placeholder="যেমন: Samsung Galaxy A55">
 
     <label>Category</label>
-    <input type="text" id="category" placeholder="যেমন: Smartphone, Fashion, Electronics">
+    <input type="text" id="category" placeholder="যেমন: Smartphone, Fashion">
 
     <label>দাম (টাকা)</label>
     <input type="number" id="price" placeholder="যেমন: 35000">
 
     <label>বিশেষ কিছু (optional)</label>
-    <textarea id="features" placeholder="যেমন: 6.6 inch display, 50MP camera, 5000mAh battery"></textarea>
+    <textarea id="features" placeholder="যেমন: 6.6 inch display, 50MP camera"></textarea>
 
     <button onclick="generateSEO()" id="genBtn">✨ AI দিয়ে SEO বানাও</button>
-    <div class="loading-text" id="loadingText">⏳ AI কাজ করছে, একটু অপেক্ষা করো...</div>
+    <div class="loading-text" id="loadingText">⏳ AI কাজ করছে...</div>
 
     <div class="result-box" id="resultBox">
       <div class="result-title">📌 SEO Title (বাংলা)</div>
       <div class="result-text" id="titleBn"></div>
-
       <div class="result-title">📌 SEO Title (English)</div>
       <div class="result-text" id="titleEn"></div>
-
       <div class="result-title">📝 Description (বাংলা)</div>
       <div class="result-text" id="descBn"></div>
-
       <div class="result-title">📝 Description (English)</div>
       <div class="result-text" id="descEn"></div>
-
       <button class="copy-btn" onclick="copyAll()">📋 সব Copy করো</button>
     </div>
   </div>
 
   <script>
-    const CLAUDE_KEY = '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';
-
     async function generateSEO() {
       const name = document.getElementById('productName').value.trim();
       const category = document.getElementById('category').value.trim();
@@ -94,39 +87,33 @@ Category: ${category || 'General'}
 Price: ${price ? price + ' টাকা' : 'উল্লেখ নেই'}
 Features: ${features || 'উল্লেখ নেই'}
 
-এই format এ দাও (exactly এই labels দিয়ে):
+এই format এ দাও:
 TITLE_BN: [বাংলায় SEO title, ৬০ character এর মধ্যে]
 TITLE_EN: [English এ SEO title, ৬০ character এর মধ্যে]
-DESC_BN: [বাংলায় product description, ১৫০-২০০ word, customer কে buy করতে উৎসাহিত করবে]
-DESC_EN: [English এ product description, ১৫০-২০০ word, customer কে buy করতে উৎসাহিত করবে]`;
+DESC_BN: [বাংলায় description, ১৫০-২০০ word]
+DESC_EN: [English এ description, ১৫০-২০০ word]`;
 
       try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const res = await fetch('/api/generate', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': CLAUDE_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-          },
-          body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1000,
-            messages: [{ role: 'user', content: prompt }]
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
         });
 
         const data = await res.json();
-        const text = data.content[0].text;
 
-        document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
-        document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
-        document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
-        document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
-        document.getElementById('resultBox').style.display = 'block';
-
-      } catch {
-        alert('❌ কিছু একটা হয়নি। Key ঠিক আছে কিনা দেখো।');
+        if (data.content && data.content[0]) {
+          const text = data.content[0].text;
+          document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
+          document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
+          document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
+          document.getElementById('descEn').textContent = extract(text, 'DESC_EN');
+          document.getElementById('resultBox').style.display = 'block';
+        } else {
+          alert('❌ AI response আসেনি। আবার চেষ্টা করো।');
+        }
+      } catch(e) {
+        alert('❌ Error: ' + e.message);
       }
 
       btn.disabled = false;
@@ -134,19 +121,13 @@ DESC_EN: [English এ product description, ১৫০-২০০ word, customer �
     }
 
     function extract(text, label) {
-      const regex = new RegExp(label + ':([\\s\\S]*?)(?=TITLE_|DESC_|$)');
+      const regex = new RegExp(label + ':([\\s\\S]*?)(?=TITLE_BN:|TITLE_EN:|DESC_BN:|DESC_EN:|$)');
       const match = text.match(regex);
       return match ? match[1].trim() : '';
     }
 
     function copyAll() {
-      const all = `SEO Title (বাংলা): ${document.getElementById('titleBn').textContent}
-
-SEO Title (English): ${document.getElementById('titleEn').textContent}
-
-Description (বাংলা): ${document.getElementById('descBn').textContent}
-
-Description (English): ${document.getElementById('descEn').textContent}`;
+      const all = `SEO Title (বাংলা): ${document.getElementById('titleBn').textContent}\n\nSEO Title (English): ${document.getElementById('titleEn').textContent}\n\nDescription (বাংলা): ${document.getElementById('descBn').textContent}\n\nDescription (English): ${document.getElementById('descEn').textContent}`;
       navigator.clipboard.writeText(all);
       alert('✅ Copied!');
     }
