@@ -9,24 +9,35 @@
     body { background: #0A0A0A; color: #E8E8E8; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
     nav { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1E1E1E; }
     .logo { font-size: 22px; font-weight: 800; color: #00FF94; }
-    .hero { padding: 60px 24px 40px; text-align: center; }
-    .badge { display: inline-block; background: #00FF9415; border: 1px solid #00FF9440; color: #00FF94; padding: 6px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 24px; }
-    h1 { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 16px; }
+    .hero { padding: 48px 24px 32px; text-align: center; }
+    .badge { display: inline-block; background: #00FF9415; border: 1px solid #00FF9440; color: #00FF94; padding: 6px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 20px; }
+    h1 { font-size: 30px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; }
     h1 span { color: #00FF94; }
-    .subtitle { color: #666; font-size: 16px; line-height: 1.6; max-width: 400px; margin: 0 auto 36px; }
-    .form-area { display: flex; flex-direction: column; gap: 12px; max-width: 360px; margin: 0 auto; }
-    input { background: #111; border: 1px solid #2A2A2A; border-radius: 10px; padding: 14px 16px; color: #E8E8E8; font-size: 15px; outline: none; width: 100%; }
+    .subtitle { color: #666; font-size: 15px; line-height: 1.6; max-width: 400px; margin: 0 auto 36px; }
+
+    .tools { padding: 0 24px 32px; max-width: 500px; margin: 0 auto; }
+    .tools-title { font-size: 13px; color: #555; margin-bottom: 16px; text-align: center; }
+    .tool-card { background: #111; border: 1px solid #1E1E1E; border-radius: 14px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; text-decoration: none; transition: border-color 0.2s; }
+    .tool-card:hover { border-color: #2A2A2A; }
+    .tool-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .tool-icon.green { background: #00FF9415; }
+    .tool-icon.blue { background: #00C2FF15; }
+    .tool-icon.orange { background: #FF6B3515; }
+    .tool-info { flex: 1; }
+    .tool-name { font-size: 15px; font-weight: 700; color: #E8E8E8; margin-bottom: 4px; }
+    .tool-desc { font-size: 12px; color: #555; }
+    .tool-arrow { color: #333; font-size: 18px; }
+
+    .signup-section { padding: 0 24px 32px; max-width: 500px; margin: 0 auto; }
+    .signup-box { background: #111; border: 1px solid #1E1E1E; border-radius: 14px; padding: 24px; }
+    .signup-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    input { background: #0A0A0A; border: 1px solid #2A2A2A; border-radius: 10px; padding: 14px 16px; color: #E8E8E8; font-size: 15px; outline: none; width: 100%; margin-bottom: 12px; }
     input:focus { border-color: #00FF9460; }
     input::placeholder { color: #444; }
-    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; }
-    .features { padding: 48px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px; margin: 0 auto; }
-    .card { background: #111; border: 1px solid #1E1E1E; border-radius: 12px; padding: 16px; }
-    .card-icon { font-size: 24px; margin-bottom: 8px; }
-    .card-title { font-size: 13px; font-weight: 700; color: #E8E8E8; margin-bottom: 4px; }
-    .card-desc { font-size: 12px; color: #555; }
+    button { background: #00FF94; color: #0A0A0A; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; width: 100%; }
+    #success { display: none; background: #00FF9415; border: 1px solid #00FF9440; border-radius: 10px; padding: 12px; color: #00FF94; text-align: center; font-size: 13px; margin-top: 12px; }
+
     .footer { text-align: center; padding: 24px; color: #333; font-size: 12px; border-top: 1px solid #1A1A1A; }
-    #success { display: none; background: #00FF9415; border: 1px solid #00FF9440; border-radius: 10px; padding: 14px; color: #00FF94; text-align: center; font-size: 14px; }
-    #error { display: none; background: #FF000015; border: 1px solid #FF000040; border-radius: 10px; padding: 14px; color: #FF6B6B; text-align: center; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -39,37 +50,47 @@
   <div class="hero">
     <div class="badge">🚀 Early Access চলছে</div>
     <h1>AI দিয়ে তোমার<br><span>অনলাইন দোকান</span><br>অটো চালাও</h1>
-    <p class="subtitle">Product import, SEO, Facebook posting — সব অটোমেটিক। তুমি শুধু profit নাও।</p>
-
-    <div class="form-area">
-      <input type="text" id="nameInput" placeholder="তোমার নাম">
-      <input type="tel" id="phoneInput" placeholder="মোবাইল নম্বর">
-      <button onclick="handleSignup()" id="btn">Early Access নিন — বিনামূল্যে</button>
-      <div id="success">✅ হয়ে গেছে! শীঘ্রই যোগাযোগ করব।</div>
-      <div id="error">❌ কিছু একটা হয়নি, আবার চেষ্টা করো।</div>
-    </div>
+    <p class="subtitle">Product import, SEO, pricing — সব অটোমেটিক। তুমি শুধু profit নাও।</p>
   </div>
 
-  <div class="features">
-    <div class="card">
-      <div class="card-icon">🤖</div>
-      <div class="card-title">AI Product Import</div>
-      <div class="card-desc">অটো SEO title ও description</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">📱</div>
-      <div class="card-title">Facebook Auto Post</div>
-      <div class="card-desc">এক click-এ সব channel-এ</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">💰</div>
-      <div class="card-title">Profit Calculator</div>
-      <div class="card-desc">Auto margin সেট করো</div>
-    </div>
-    <div class="card">
-      <div class="card-icon">📦</div>
-      <div class="card-title">Order Tracking</div>
-      <div class="card-desc">Customer কে অটো update</div>
+  <div class="tools">
+    <div class="tools-title">🛠️ AI Tools</div>
+
+    <a href="seo.html" class="tool-card">
+      <div class="tool-icon green">🤖</div>
+      <div class="tool-info">
+        <div class="tool-name">AI SEO Generator</div>
+        <div class="tool-desc">Product নাম দাও — AI title ও description লিখবে</div>
+      </div>
+      <div class="tool-arrow">›</div>
+    </a>
+
+    <a href="pricing.html" class="tool-card">
+      <div class="tool-icon blue">💰</div>
+      <div class="tool-info">
+        <div class="tool-name">Pricing Calculator</div>
+        <div class="tool-desc">Cost দাও — AI sell price ও Facebook post বানাবে</div>
+      </div>
+      <div class="tool-arrow">›</div>
+    </a>
+
+    <a href="admin.html" class="tool-card">
+      <div class="tool-icon orange">📊</div>
+      <div class="tool-info">
+        <div class="tool-name">Admin Panel</div>
+        <div class="tool-desc">Signup list ও analytics দেখো</div>
+      </div>
+      <div class="tool-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="signup-section">
+    <div class="signup-box">
+      <div class="signup-title">✉️ Early Access নিন — বিনামূল্যে</div>
+      <input type="text" id="nameInput" placeholder="তোমার নাম">
+      <input type="tel" id="phoneInput" placeholder="মোবাইল নম্বর">
+      <button onclick="handleSignup()">Early Access নিন</button>
+      <div id="success">✅ হয়ে গেছে! শীঘ্রই যোগাযোগ করব।</div>
     </div>
   </div>
 
@@ -82,13 +103,7 @@
     async function handleSignup() {
       const name = document.getElementById('nameInput').value.trim();
       const phone = document.getElementById('phoneInput').value.trim();
-      const btn = document.getElementById('btn');
-
       if (!name || !phone) { alert('নাম ও মোবাইল নম্বর দাও'); return; }
-
-      btn.textContent = 'সাবমিট হচ্ছে...';
-      btn.disabled = true;
-
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/Signups`, {
           method: 'POST',
@@ -100,22 +115,12 @@
           },
           body: JSON.stringify({ name, phone })
         });
-
         if (res.ok) {
           document.getElementById('success').style.display = 'block';
-          document.getElementById('error').style.display = 'none';
           document.getElementById('nameInput').value = '';
           document.getElementById('phoneInput').value = '';
-        } else {
-          throw new Error('Failed');
         }
-      } catch {
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('success').style.display = 'none';
-      }
-
-      btn.textContent = 'Early Access নিন — বিনামূল্যে';
-      btn.disabled = false;
+      } catch(e) { console.log(e); }
     }
   </script>
 
