@@ -4,17 +4,14 @@ export default async function handler(req, res) {
   }
 
   const { prompt } = req.body;
-
-  if (!process.env.ANTHROPIC_KEY) {
-    return res.status(500).json({ error: 'API key missing' });
-  }
+  const key = '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';
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_KEY,
+        'x-api-key': key,
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
