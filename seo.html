@@ -110,8 +110,8 @@ DESC_EN: [English এ description, ১৫০-২০০ word]`;
         debugBox.style.display = 'block';
         debugBox.textContent = JSON.stringify(data, null, 2);
 
-        if (data.content && data.content[0]) {
-          const text = data.content[0].text;
+    if (data.choices && data.choices[0]) {
+  const text = data.choices[0].message.content;
           document.getElementById('titleBn').textContent = extract(text, 'TITLE_BN');
           document.getElementById('titleEn').textContent = extract(text, 'TITLE_EN');
           document.getElementById('descBn').textContent = extract(text, 'DESC_BN');
