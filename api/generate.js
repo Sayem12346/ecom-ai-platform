@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   const { prompt } = req.body;
-  const key = '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';
+  const key = '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';
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
